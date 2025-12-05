@@ -24,5 +24,8 @@ public:
 	//Doc noi dung file csv va in output log ra unreal editor
 	UFUNCTION(BlueprintCallable, Category = "Flight Data")
 	static bool LoadCSVAndPrint(const FString& FilePath);
-	
+
+
+	UFUNCTION(BlueprintCallable, Category = "Flight Data")
+	static bool ParseCSV(const FString& FilePath, TArray<struct FFlightPoint>& OutPoints);
 };
