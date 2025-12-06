@@ -15,8 +15,9 @@
 #include "Misc/Paths.h"
 
 #include "FlightPoint.h"
+#include "FlightMathLibrary.h"
 
-
+//=============================================
 bool  UFlightDataManager::OpenCSVFileDialog(FString& OutFilePath)
 {
 
@@ -59,6 +60,8 @@ bool  UFlightDataManager::OpenCSVFileDialog(FString& OutFilePath)
 	return true;
 }
 
+
+//=============================================
 bool UFlightDataManager::LoadCSVAndPrint(const FString& FilePath)
 {
 
@@ -100,6 +103,8 @@ bool UFlightDataManager::LoadCSVAndPrint(const FString& FilePath)
 	return false;
 }
 
+
+//=============================================
 bool UFlightDataManager::ParseCSV(const FString& FilePath, TArray<struct FFlightPoint>& OutPoints)
 {
 	OutPoints.Empty();
@@ -173,11 +178,63 @@ bool UFlightDataManager::ParseCSV(const FString& FilePath, TArray<struct FFlight
 		OutPoints.Add(Point);
 
 		
-		UE_LOG(LogTemp, Log, TEXT("[ParseCSV] Line %d    OK ? Timestamp=%s | Lat=%.6f | Lon=%.6f | Alt=%.2f"),
+		UE_LOG(LogTemp, Log, TEXT("[ParseCSV] Line %d OK ? Timestamp=%s | Lat=%.6f | Lon=%.6f | Alt=%.2f"),
 			i + 1, *Timestamp, Lat, Lon, Alt);
 	}
 
 	UE_LOG(LogTemp, Log, TEXT("[ParseCSV] Parse complete. Total valid points: %d"), OutPoints.Num());
+
+	//=============================================
+	// In ra khoang cach, van toc, goc phuong vi giua cac diem
+	//=============================================
+	if (OutPoints.Num() >= 2)
+	{
+		UE_LOG(LogTemp, Log, TEXT(""));
+		UE_LOG(LogTemp, Log, TEXT("======= FLIGHT METRICS BETWEEN POINTS ======="));
+		UE_LOG(LogTemp, Log, TEXT("%-10s %-24s %-24s %-12s %-15s %-15s"), 
+			TEXT("Segment"), TEXT("From"), TEXT("To"), TEXT("Distance(m)"), TEXT("Velocity(m/s)"), TEXT("Bearing(deg)"));
+		UE_LOG(LogTemp, Log, TEXT("----------------------------------------------------------------------"));
+
+		double TotalDistance = 0.0;
+
+		for (int32 i = 0; i < OutPoints.Num() - 1; i++)
+		{
+			const FFlightPoint& PointA = OutPoints[i];
+			const FFlightPoint& PointB = OutPoints[i + 1];
+
+			// Tinh khoang cach giua 2 diem (met)
+			double Distance = UFlightMathLibrary::HaversineDistance(PointA, PointB);
+			TotalDistance += Distance;
+
+			// Tinh van toc (m/s)
+			double Velocity = UFlightMathLibrary::ComputeInstanVeclocity(PointA, PointB);
+
+			// Tinh goc phuong vi (do)
+			double Bearing = UFlightMathLibrary::ComputeBearing(PointA, PointB);
+
+			// In ra log
+			UE_LOG(LogTemp, Log, TEXT("[%d->%d]   %-12s %-12s    %-12.2f %-15.2f %-15.2f  [%.6f,%.6f] --> [%.6f,%.6f]"),
+				i + 1, i + 2,
+				*PointA.Timestamp,
+				*PointB.Timestamp,
+				Distance,
+				Velocity,
+				Bearing,
+				PointA.Latitude,
+				PointA.Longitude,
+				PointB.Latitude,
+				PointB.Longitude
+				);
+		}
+
+		UE_LOG(LogTemp, Log, TEXT("----------------------------------------------------------------------"));
+		UE_LOG(LogTemp, Log, TEXT("TOTAL DISTANCE: %.2f meters (%.2f km)"), TotalDistance, TotalDistance / 1000.0);
+		UE_LOG(LogTemp, Log, TEXT("======= END FLIGHT METRICS ======="));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ParseCSV] Not enough points to calculate metrics (need at least 2 points)"));
+	}
 
 	return OutPoints.Num() > 0;
 }
