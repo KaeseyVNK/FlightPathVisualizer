@@ -8,8 +8,9 @@
 static constexpr double EARTH_RADIUS_METERS = 6371e3; // Bán kính trung bình của Trái Đất tính bằng mét
 
 
-
+//=============================================
 //convert timestamp --> serconds
+//=============================================
 int32 UFlightMathLibrary::TimeStringToSeconds(const FString& Timestamp)
 {
 	TArray<FString> Parts; 
@@ -26,8 +27,9 @@ int32 UFlightMathLibrary::TimeStringToSeconds(const FString& Timestamp)
 	return H * 3600 + M * 60 + S;
 }
 
-
+//=============================================
 //khoang cach giua 2 diem tren mat cau Harversine 
+//=============================================
 double UFlightMathLibrary::HaversineDistance(const FFlightPoint& A, const FFlightPoint& B)
 {
 	double Lat1 = FMath::DegreesToRadians(A.Latitude);
@@ -46,7 +48,9 @@ double UFlightMathLibrary::HaversineDistance(const FFlightPoint& A, const FFligh
 	return c * EARTH_RADIUS_METERS;
 }
 
+//=============================================
 //tong quan duong tich luy
+//=============================================
 double UFlightMathLibrary::ComputeCumulativeDistance(const TArray<FFlightPoint>& Points)
 {
 	double Total = 0.0;
@@ -59,8 +63,9 @@ double UFlightMathLibrary::ComputeCumulativeDistance(const TArray<FFlightPoint>&
 	return Total;
 }
 
-
+//=============================================
 //van toc giua 2 diem
+//=============================================
 double UFlightMathLibrary::ComputeInstanVeclocity(const FFlightPoint& A, const FFlightPoint& B)
 {
 
@@ -77,6 +82,11 @@ double UFlightMathLibrary::ComputeInstanVeclocity(const FFlightPoint& A, const F
 
 	return Distance/DeltaTime;
 }
+
+
+//=============================================
+//Tinh goc phuong vi (bearing) giua 2 diem
+//=============================================
 
 double UFlightMathLibrary::ComputeBearing(const FFlightPoint& A, const FFlightPoint& B)
 {

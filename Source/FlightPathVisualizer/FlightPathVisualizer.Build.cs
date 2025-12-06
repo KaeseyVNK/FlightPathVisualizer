@@ -8,9 +8,11 @@ public class FlightPathVisualizer : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "DesktopPlatform" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "DesktopPlatform", "ApplicationCore" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
+
+		PublicDefinitions.Add("WITH_AUTOMATION_TEST=1");
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
