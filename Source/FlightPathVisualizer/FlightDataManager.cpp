@@ -95,10 +95,10 @@ bool UFlightDataManager::LoadCSVAndPrint(const FString& FilePath)
 		UE_LOG(LogTemp, Log, TEXT("%s"), *Line);
 		countlog++;
 	}
-	UE_LOG(LogTemp, Log, TEXT("======= File Content End ======="));
+	/*UE_LOG(LogTemp, Log, TEXT("======= File Content End ======="));
 
 
-	UE_LOG(LogTemp, Log, TEXT("======= Total lines read: %d========="), countlog);
+	UE_LOG(LogTemp, Log, TEXT("======= Total lines read: %d========="), countlog);*/
 
 	return false;
 }
@@ -126,7 +126,7 @@ bool UFlightDataManager::ParseCSV(const FString& FilePath, TArray<struct FFlight
 		return false;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("[ParseCSV] %d lines loaded from CSV."), Lines.Num());
+	//UE_LOG(LogTemp, Log, TEXT("[ParseCSV] %d lines loaded from CSV."), Lines.Num());
 
 	for (int32 i = 1; i < Lines.Num(); i++)
 	{
@@ -178,22 +178,22 @@ bool UFlightDataManager::ParseCSV(const FString& FilePath, TArray<struct FFlight
 		OutPoints.Add(Point);
 
 		
-		UE_LOG(LogTemp, Log, TEXT("[ParseCSV] Line %d OK ? Timestamp=%s | Lat=%.6f | Lon=%.6f | Alt=%.2f"),
-			i + 1, *Timestamp, Lat, Lon, Alt);
+		//UE_LOG(LogTemp, Log, TEXT("[ParseCSV] Line %d OK ? Timestamp=%s | Lat=%.6f | Lon=%.6f | Alt=%.2f"),
+			/*i + 1, *Timestamp, Lat, Lon, Alt);*/
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("[ParseCSV] Parse complete. Total valid points: %d"), OutPoints.Num());
+	//UE_LOG(LogTemp, Log, TEXT("[ParseCSV] Parse complete. Total valid points: %d"), OutPoints.Num());
 
 	//=============================================
 	// In ra khoang cach, van toc, goc phuong vi giua cac diem
 	//=============================================
 	if (OutPoints.Num() >= 2)
 	{
-		UE_LOG(LogTemp, Log, TEXT(""));
+		/*UE_LOG(LogTemp, Log, TEXT(""));
 		UE_LOG(LogTemp, Log, TEXT("======= FLIGHT METRICS BETWEEN POINTS ======="));
 		UE_LOG(LogTemp, Log, TEXT("%-10s %-24s %-24s %-12s %-15s %-15s"), 
 			TEXT("Segment"), TEXT("From"), TEXT("To"), TEXT("Distance(m)"), TEXT("Velocity(m/s)"), TEXT("Bearing(deg)"));
-		UE_LOG(LogTemp, Log, TEXT("----------------------------------------------------------------------"));
+		UE_LOG(LogTemp, Log, TEXT("----------------------------------------------------------------------"));*/
 
 		double TotalDistance = 0.0;
 
@@ -213,8 +213,8 @@ bool UFlightDataManager::ParseCSV(const FString& FilePath, TArray<struct FFlight
 			double Bearing = UFlightMathLibrary::ComputeBearing(PointA, PointB);
 
 			// In ra log
-			UE_LOG(LogTemp, Log, TEXT("[%d->%d]   %-12s %-12s    %-12.2f %-15.2f %-15.2f  [%.6f,%.6f] --> [%.6f,%.6f]"),
-				i + 1, i + 2,
+			//UE_LOG(LogTemp, Log, TEXT("[%d->%d]   %-12s %-12s    %-12.2f %-15.2f %-15.2f  [%.6f,%.6f] --> [%.6f,%.6f]"),
+				/*i + 1, i + 2,
 				*PointA.Timestamp,
 				*PointB.Timestamp,
 				Distance,
@@ -224,12 +224,12 @@ bool UFlightDataManager::ParseCSV(const FString& FilePath, TArray<struct FFlight
 				PointA.Longitude,
 				PointB.Latitude,
 				PointB.Longitude
-				);
+				);*/
 		}
 
-		UE_LOG(LogTemp, Log, TEXT("----------------------------------------------------------------------"));
-		UE_LOG(LogTemp, Log, TEXT("TOTAL DISTANCE: %.2f meters (%.2f km)"), TotalDistance, TotalDistance / 1000.0);
-		UE_LOG(LogTemp, Log, TEXT("======= END FLIGHT METRICS ======="));
+		//UE_LOG(LogTemp, Log, TEXT("----------------------------------------------------------------------"));
+		//UE_LOG(LogTemp, Log, TEXT("TOTAL DISTANCE: %.2f meters (%.2f km)"), TotalDistance, TotalDistance / 1000.0);
+		//UE_LOG(LogTemp, Log, TEXT("======= END FLIGHT METRICS ======="));
 	}
 	else
 	{

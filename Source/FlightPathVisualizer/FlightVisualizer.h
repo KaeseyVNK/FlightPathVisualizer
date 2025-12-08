@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "FlightDataManager.h"
-#include "FlightGeoConverter.h"
+#include "FlightPoint.h"
+#include "FlightCoordinateActor.h"
 #include "FlightVisualizer.generated.h"
 
 UCLASS()
@@ -25,10 +25,23 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AFlightGeoConverter* GeoConverter;
 
 	UFUNCTION(BlueprintCallable )
+	void LoadAndVisualizeFlightPath(const FString& CSVPath);*/
+
+	// ============================================
+	// Convert  visualize
+	// ============================================
+	UFUNCTION(BlueprintCallable, Category = "Flight")
 	void LoadAndVisualizeFlightPath(const FString& CSVPath);
+
+	// Actor chuyen doi GPS ENU
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
+	AFlightCoordinateActor* CoordinateSystem;
+
+private:
+	void DrawDebugPoints(const TArray<FVector>& Points);
 
 };

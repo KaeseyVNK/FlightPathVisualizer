@@ -125,23 +125,70 @@ FVector AFlightGeoConverter::ConvertSingleGPS(const FFlightPoint& GPSPoint)
 
 	//return LocalUE;
 
+	//================================================
+	//================================================
+
+	//if (!GeoSystem)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("FlightGeoConverter: GeoSystem is not assigned!"));
+	//	return FVector::ZeroVector;
+	//}
+
+	//FGeographicCoordinates TargetGeo(GPSPoint.Longitude, GPSPoint.Latitude, GPSPoint.Altitude);
+
+	//FVector TargetECEF, OriginECEF;
+	//GeoSystem->GeographicToECEF(TargetGeo, TargetECEF);
+	//GeoSystem->GeographicToECEF(OriginGeographic, OriginECEF);
+
+	//FVector LocalECEF = TargetECEF - OriginECEF;
+
+	//FVector LocalUE;
+	//GeoSystem->ECEFToEngine(LocalECEF, LocalUE);
+
+
+	////================================================
+
+	//
+	//FVector BackToECEF;
+	//GeoSystem->EngineToECEF(LocalUE, BackToECEF);
+
+	//FGeographicCoordinates BackToGeo;
+	//GeoSystem->ECEFToGeographic(BackToECEF + OriginECEF, BackToGeo);
+
+
+	//UE_LOG(LogTemp, Warning,
+	//	TEXT("[RoundTrip] ORI GPS: %.6f, %.6f -> BACK GPS: %.6f, %.6f"),
+	//	GPSPoint.Latitude, GPSPoint.Longitude,
+	//	BackToGeo.Latitude, BackToGeo.Longitude
+	//);
+
+	//return LocalUE;
+
 	if (!GeoSystem)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("FlightGeoConverter: GeoSystem is not assigned!"));
+		UE_LOG(LogTemp, Error, TEXT("[GeoConverter] GeoSystem is NULL!"));
 		return FVector::ZeroVector;
 	}
 
-	FGeographicCoordinates TargetGeo(GPSPoint.Longitude, GPSPoint.Latitude, GPSPoint.Altitude);
+	// GeographicCoordinates: Latitude, Longitude, Altitude
+	FGeographicCoordinates GeoPoint(
+		GPSPoint.Latitude,
+		GPSPoint.Longitude,
+		GPSPoint.Altitude
+	);
 
-	FVector TargetECEF, OriginECEF;
-	GeoSystem->GeographicToECEF(TargetGeo, TargetECEF);
-	GeoSystem->GeographicToECEF(OriginGeographic, OriginECEF);
+	FVector EnginePosition;
+	GeoSystem->GeographicToEngine(GeoPoint, EnginePosition);
+	bool bOK = true; // Assume success, or set based on your own error handling if available
 
-	FVector LocalECEF = TargetECEF - OriginECEF;
+	if (!bOK)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[GeoConverter] GeographicToEngine FAILED for point (%f, %f, %f)"),
+			GPSPoint.Latitude, GPSPoint.Longitude, GPSPoint.Altitude);
 
-	FVector LocalUE;
-	GeoSystem->ECEFToEngine(LocalECEF, LocalUE);
+		return FVector::ZeroVector;
+	}
 
-	return LocalUE;
+	return EnginePosition;
 }
 
