@@ -55,7 +55,7 @@ public:
 
 	//tao sline voi mesh 
 	UFUNCTION(BlueprintCallable, Category = "Flight Path")
-	void BuildSplineMeshes(UStaticMesh* SplineMesh, float Width = 20.0f);
+	void BuildSplineMeshes(UStaticMesh* SplineMesh, float Width = 10.0f);
 
 
 

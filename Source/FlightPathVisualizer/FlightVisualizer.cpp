@@ -191,7 +191,7 @@ void AFlightVisualizer::LoadAndVisualizeFlightPath(const FString& CSVPath)
     if (SplineMesh)
     {
         // Width = 20.0f (hoặc số tùy ý), chỉnh độ dày đường nối
-        SplineActor->BuildSplineMeshes(SplineMesh, 0.10f);
+        SplineActor->BuildSplineMeshes(SplineMesh, Thickness);
     }
     else
     {

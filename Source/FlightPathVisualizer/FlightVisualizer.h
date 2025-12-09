@@ -45,6 +45,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
 	float WorldScale = 50.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
+	float Thickness = 20.0f;
+
 	// [SỬA] Mesh dùng để hiển thị đường nối (chọn Cylinder/Pipe)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
 	UStaticMesh* SplineMesh;

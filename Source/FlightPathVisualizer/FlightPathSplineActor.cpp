@@ -90,7 +90,7 @@ void AFlightPathSplineActor::BuildSplineFromPoints(const TArray<FVector>& Points
 		WaypointISMC->SetMaterial(0, WaypointMaterial);
 	}
 
-	//Tim do cao min/m� de chuan hoa mau sac
+	//Tim do cao min/max de chuan hoa mau sac
 	float MinZ = Points[0].Z;
 	float MaxZ = Points[0].Z;
 	for (const FVector& P : Points)
@@ -100,25 +100,37 @@ void AFlightPathSplineActor::BuildSplineFromPoints(const TArray<FVector>& Points
 	}
 	float RangeZ = (MaxZ - MinZ) > 0 ? (MaxZ - MinZ) : 1.0f;
 
-	// Loop tao instance
-	for (const FVector& P : Points)
+	// [SỬA ĐỔI] Dùng vòng lặp theo Index để lấy Rotation từ Spline
+	for (int32 i = 0; i < Points.Num(); i++)
 	{
-		// Tao transform cho moi instance
-		FTransform InstanceTransform;
-		InstanceTransform.SetLocation(P);
-		InstanceTransform.SetScale3D(WaypointScale);
+		const FVector& P = Points[i];
+
+		// Lấy hướng xoay tại điểm spline thứ i (Local space)
+		FRotator PointRotation = SplineComp->GetRotationAtSplinePoint(i, ESplineCoordinateSpace::Local);
+
+		// [SỬA] Xoay thêm -90 độ trục Pitch để đỉnh nón (Z-up) hướng về phía trước (X-forward)
+        // Tùy mesh mà có thể là -90 hoặc +90, bạn thử -90 trước nhé.
+        FRotator AdjustedRotation = PointRotation + FRotator(-90.0f, 0.0f, 0.0f);
+
+        // Tao transform cho moi instance
+        FTransform InstanceTransform;
+        InstanceTransform.SetLocation(P);
+        
+        // Set Rotation đã điều chỉnh
+        InstanceTransform.SetRotation(AdjustedRotation.Quaternion());
+        
+        InstanceTransform.SetScale3D(WaypointScale);
 
 		// Them instance vao ISMC
 		int32 InstanceIndex = WaypointISMC->AddInstance(InstanceTransform, true);
 
 		// Tinh toan gia tri chuan hoa do cao giua 0 va 1
 		float NormalizedHeight = (P.Z - MinZ) / RangeZ;
+        
+        WaypointISMC->SetCustomDataValue(InstanceIndex, 0, NormalizedHeight, true);
+    }
 
-		
-		WaypointISMC->SetCustomDataValue(InstanceIndex, 0, NormalizedHeight, true);
-	}
-
-	WaypointISMC->MarkRenderStateDirty();
+    WaypointISMC->MarkRenderStateDirty();
 
 	UE_LOG(LogTemp, Log, TEXT("BuildSplineFromPoints: Spline & ISMC built with %d points"), Points.Num());
 }
@@ -157,7 +169,7 @@ void AFlightPathSplineActor::BuildSplineMeshes(UStaticMesh* SplineMesh, float Wi
 		MeshComp->SetStartAndEnd(StartPos, StartTan, EndPos, EndTan);
 
 
-		float ScaleFactor = Width ? Width : 2.0f;
+		float ScaleFactor = Width;
 
 
 		// Gan component vao actor
