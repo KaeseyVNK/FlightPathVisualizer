@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "FlightPoint.h"
 #include "FlightCoordinateActor.h"
+#include "FlightPathSplineActor.h"
 #include "FlightVisualizer.generated.h"
 
 UCLASS()
@@ -40,6 +41,9 @@ public:
 	// Actor chuyen doi GPS ENU
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
 	AFlightCoordinateActor* CoordinateSystem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
+	UStaticMesh* SplineMesh;
 
 private:
 	void DrawDebugPoints(const TArray<FVector>& Points);
