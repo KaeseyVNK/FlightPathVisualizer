@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SplineComponent.h"
+#include "Components/InstancedStaticMeshComponent.h"
 #include "FlightPathSplineActor.generated.h"
 
 UCLASS()
@@ -27,7 +28,24 @@ public:
 	// spline su dung de ve duong bay
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category ="Spline")
 	USplineComponent* SplineComp;
-	
+
+	//Component de ve hang loat waypoint toi uu
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visualization")
+	UInstancedStaticMeshComponent* WaypointISMC;
+
+	//Mesh hien thi cho moi diem ( vd: Sphere )
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visualization")
+	UStaticMesh* WaypointMesh;
+
+	//Vat lieu hien thi cho moi diem
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visualization")
+	UMaterialInterface* WaypointMaterial;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visualization")
+	UMaterialInterface* SplineMaterial;
+
+
 	//==============================================
 	// Ham nhan du lieu va dung spline
 	//==============================================
@@ -39,4 +57,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Flight Path")
 	void BuildSplineMeshes(UStaticMesh* SplineMesh, float Width = 20.0f);
 
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visualization")
+	FVector WaypointScale = FVector(1.0f);
 };
