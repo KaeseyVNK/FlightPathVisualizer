@@ -8,7 +8,7 @@ public class FlightPathVisualizer : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "DesktopPlatform", "ApplicationCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "DesktopPlatform", "ApplicationCore", "GeoReferencing"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
