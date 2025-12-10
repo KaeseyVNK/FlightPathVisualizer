@@ -9,6 +9,22 @@
 #include "FlightPathSplineActor.h"
 #include "FlightVisualizer.generated.h"
 
+// [THÊM MỚI] Struct chứa thông tin thống kê để gửi cho UI
+USTRUCT(BlueprintType)
+struct FFlightStats
+{
+    GENERATED_BODY()
+
+    UPROPERTY(BlueprintReadOnly, Category = "Stats")
+    float TotalDistanceKm;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Stats")
+    float TotalFlightTimeSec;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Stats")
+    float AvgAltitudeMeters;
+};
+
 UCLASS()
 class FLIGHTPATHVISUALIZER_API AFlightVisualizer : public AActor
 {
@@ -48,11 +64,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
 	float Thickness = 20.0f;
 
-	// [SỬA] Mesh dùng để hiển thị đường nối (chọn Cylinder/Pipe)
+	// Mesh dùng để hiển thị đường nối (chọn Cylinder/Pipe)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
 	UStaticMesh* SplineMesh;
 
-	// [THÊM MỚI] Mesh dùng để hiển thị các điểm Waypoint (chọn Sphere)
+	// Mesh dùng để hiển thị các điểm Waypoint (chọn Sphere)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
 	UStaticMesh* WaypointMesh;
 
@@ -61,6 +77,22 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
 	UMaterialInterface* SplineMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flight Stats")
+	float TotalDistanceKm;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flight Stats")
+	float TotalFlightTimeSec;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flight Stats")
+	float AvgAltitudeMeters;
+
+	void CaculateFlightStats(const TArray<FFlightPoint>& GPSPoints);
+
+public:
+    // [THÊM MỚI] Hàm trả về struct thống kê cho Widget
+    UFUNCTION(BlueprintPure, Category = "Flight Stats")
+    FFlightStats GetFlightStatistics() const;
 
 private:
 	void DrawDebugPoints(const TArray<FVector>& Points);

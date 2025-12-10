@@ -22,12 +22,17 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight Data")
     float Altitude;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight Data")
+    double TimeInSeconds;
+
+
     // Default constructor initializes all members
     FFlightPoint()
         : Timestamp(TEXT("00:00:00"))
         , Latitude(0.0)
         , Longitude(0.0)
         , Altitude(0.0f)
+		, TimeInSeconds(0.0)
     {
     }
 
@@ -37,6 +42,7 @@ public:
         , Latitude(InLat)
         , Longitude(InLon)
         , Altitude(InAlt)
+        , TimeInSeconds(0.0)
     {
     }
 };
