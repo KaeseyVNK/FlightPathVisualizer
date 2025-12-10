@@ -102,6 +102,8 @@ void AFlightVisualizer::LoadAndVisualizeFlightPath(const FString& CSVPath)
         return;
     }
 
+    ParsedGPSPoints = GPSPoints;
+
     UE_LOG(LogTemp, Log, TEXT("[Visualizer] Parsed %d GPS points."), GPSPoints.Num());
 
   
@@ -220,7 +222,7 @@ void AFlightVisualizer::CaculateFlightStats(const TArray<FFlightPoint>& GPSPoint
     {
 		TotalAlt += GPSPoints[i].Altitude;
         UE_LOG(LogTemp, Log, TEXT("Point %d: Lat=%f, Lon=%f, Alt=%f, Timestamp=%f"), 
-			i, GPSPoints[i].Latitude, GPSPoints[i].Longitude, GPSPoints[i].Altitude, GPSPoints[i].TimeInSeconds);
+			i, GPSPoints[i].Latitude, GPSPoints[i].Longitude, GPSPoints[i].Altitude, GPSPoints[i].TimeInSeconds );
         if (i > 0) 
         {
             //c1: su dung cong thuc haversine de tinh toan khoang cach giua 2 diem tren GPS
@@ -244,6 +246,20 @@ void AFlightVisualizer::CaculateFlightStats(const TArray<FFlightPoint>& GPSPoint
 
     TotalFlightTimeSec = (float)(GPSPoints.Last().TimeInSeconds - GPSPoints[0].TimeInSeconds);
 
+}
+
+TArray<UFlightPointData*> AFlightVisualizer::GetFlightPointsForListView()
+{
+    TArray<UFlightPointData*> DataList;
+    for (int32 i = 0; i < ParsedGPSPoints.Num(); i++) {
+
+        UFlightPointData* DataObj = NewObject<UFlightPointData>(this);
+        DataObj->PointData = ParsedGPSPoints[i];
+        DataObj->Index = i + 1;
+        DataList.Add(DataObj);
+    }
+     
+    return DataList;
 }
 
 void AFlightVisualizer::DrawDebugPoints(const TArray<FVector>& Points)

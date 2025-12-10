@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
 #include "FlightPoint.h"
 #include "FlightCoordinateActor.h"
 #include "FlightPathSplineActor.h"
+#include "FlightPointData.h"
+
 #include "FlightVisualizer.generated.h"
 
 // [THÊM MỚI] Struct chứa thông tin thống kê để gửi cho UI
@@ -29,8 +32,8 @@ UCLASS()
 class FLIGHTPATHVISUALIZER_API AFlightVisualizer : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AFlightVisualizer();
 
@@ -38,7 +41,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -58,6 +61,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
 	AFlightCoordinateActor* CoordinateSystem;
 
+
+	//============================
+	// Cai dat cua hien thi duong bay
+	//============================
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
 	float WorldScale = 50.0f;
 
@@ -72,12 +79,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
 	UStaticMesh* WaypointMesh;
 
+	// Kích thước điểm Waypoint
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
 	FVector WaypointScale = FVector(1.0f);
 
+	// Material dùng để hiển thị đường nối
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
 	UMaterialInterface* SplineMaterial;
 
+
+
+
+	//===========================
+	//Stats cua chuyen bay
+	//===========================
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flight Stats")
 	float TotalDistanceKm;
 
@@ -89,8 +104,21 @@ public:
 
 	void CaculateFlightStats(const TArray<FFlightPoint>& GPSPoints);
 
+
+	//chuyen doi du lieu cho ui listview
+	UFUNCTION(BlueprintCallable, Category = "Flight UI")
+	TArray<UFlightPointData*> GetFlightPointsForListView();
+
+
+
+	UPROPERTY(BlueprintReadOnly, Category = "Flight Data")
+	TArray<FFlightPoint> ParsedGPSPoints;
+
+	UFUNCTION(BlueprintCallable, Category = "Flight Data")
+	TArray<FFlightPoint> GetFlightPoints() const { return ParsedGPSPoints; }
+
 public:
-    // [THÊM MỚI] Hàm trả về struct thống kê cho Widget
+    // Hàm trả về struct thống kê cho Widget
     UFUNCTION(BlueprintPure, Category = "Flight Stats")
     FFlightStats GetFlightStatistics() const;
 
