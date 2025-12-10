@@ -4,7 +4,7 @@
 #include "FlightVisualizer.h"
 #include "FlightDataManager.h"
 #include "DrawDebugHelpers.h"
-#include "FlightMathLibrary.h"
+#include "FlightMathLibrary.h" // Nhớ include thư viện toán
 #include "FlightPathSplineActor.h"
 // Sets default values
 AFlightVisualizer::AFlightVisualizer()
@@ -251,14 +251,39 @@ void AFlightVisualizer::CaculateFlightStats(const TArray<FFlightPoint>& GPSPoint
 TArray<UFlightPointData*> AFlightVisualizer::GetFlightPointsForListView()
 {
     TArray<UFlightPointData*> DataList;
-    for (int32 i = 0; i < ParsedGPSPoints.Num(); i++) {
 
+    for (int32 i = 0; i < ParsedGPSPoints.Num(); i++)
+    {
         UFlightPointData* DataObj = NewObject<UFlightPointData>(this);
         DataObj->PointData = ParsedGPSPoints[i];
         DataObj->Index = i + 1;
+
+        // [THÊM MỚI] Tính toán thông tin tới điểm tiếp theo
+        if (i < ParsedGPSPoints.Num() - 1)
+        {
+            const FFlightPoint& CurrentP = ParsedGPSPoints[i];
+            const FFlightPoint& NextP = ParsedGPSPoints[i + 1];
+
+            // Tính khoảng cách (Haversine hoặc Euclidean tùy bạn chọn, ở đây dùng Haversine cho chuẩn GPS)
+            DataObj->DistanceToNext = (float)UFlightMathLibrary::HaversineDistance(CurrentP, NextP);
+
+            // Tính vận tốc
+            DataObj->VelocityToNext = (float)UFlightMathLibrary::ComputeInstanVeclocity(CurrentP, NextP);
+
+            // Tính góc phương vị
+            DataObj->BearingToNext = (float)UFlightMathLibrary::ComputeBearing(CurrentP, NextP);
+        }
+        else
+        {
+            // Điểm cuối cùng không có điểm tiếp theo
+            DataObj->DistanceToNext = 0.0f;
+            DataObj->VelocityToNext = 0.0f;
+            DataObj->BearingToNext = 0.0f;
+        }
+
         DataList.Add(DataObj);
     }
-     
+
     return DataList;
 }
 

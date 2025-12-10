@@ -27,5 +27,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data", Meta = (MakeEditWidget = true))
 	int32 Index;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	//m
+	float DistanceToNext; 
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	//m/s
+	float VelocityToNext;
+
+	//Do 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	float BearingToNext;
+
 };
 
