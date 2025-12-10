@@ -4,6 +4,7 @@
 #include "FlightVisualizer.h"
 #include "FlightDataManager.h"
 #include "DrawDebugHelpers.h"
+#include "FlightPathSplineActor.h"
 // Sets default values
 AFlightVisualizer::AFlightVisualizer()
 {
@@ -116,10 +117,92 @@ void AFlightVisualizer::LoadAndVisualizeFlightPath(const FString& CSVPath)
     TArray<FVector> LocalPoints;
     CoordinateSystem->ConvertArray(GPSPoints, LocalPoints);
 
+    if (WorldScale != 1.0f)
+    {
+        for (FVector& P : LocalPoints)
+        {
+            P *= WorldScale;
+        }
+    }
+
     UE_LOG(LogTemp, Log, TEXT("[Visualizer] Converted %d points to ENU space."), LocalPoints.Num());
 
+    /*AFlightPathSplineActor* SplineActor = GetWorld()->SpawnActor<AFlightPathSplineActor>();
+    SplineActor->BuildSplineFromPoints(LocalPoints);
+
+    if (SplineMesh)
+    {
+        SplineActor->BuildSplineMeshes(SplineMesh, 10.0f);
+	}
+    else
+    {
+		UE_LOG(LogTemp, Warning, TEXT("[Visualizer] SplineMesh is NULL, cannot build spline meshes."));
+    }*/
+
     
-    DrawDebugPoints(LocalPoints);
+    FlushPersistentDebugLines(GetWorld());
+
+    //float DebugScale = 50.0f;
+
+    //if (LocalPoints.Num() > 1)
+    //{
+    //    for (int32 i = 0; i < LocalPoints.Num() - 1; i++)
+    //    {
+    //        DrawDebugLine(
+    //            GetWorld(),
+    //            LocalPoints[i] * DebugScale,         // Điểm bắt đầu
+    //            LocalPoints[i + 1] * DebugScale,     // Điểm kết thúc
+    //            FColor::Green,           // Màu sắc (Cyan cho dễ nhìn trên nền tối)
+    //            true,                   // Persistent = true (giữ nguyên trên màn hình không biến mất)
+    //            -1.0f,                  // Lifetime (vô hạn nếu Persistent=true)
+    //            0,                      // DepthPriority
+    //            10.0f                    // Thickness (độ dày đường)
+    //        );
+    //    }
+    //}
+
+    AFlightPathSplineActor* SplineActor = GetWorld()->SpawnActor<AFlightPathSplineActor>();
+
+    // 1. Cấu hình Mesh cho Waypoint (các điểm)
+    if (WaypointMesh)
+    {
+        SplineActor->WaypointMesh = WaypointMesh;
+    }
+    else
+    {
+        // Fallback: Nếu chưa chọn WaypointMesh, dùng tạm SplineMesh (nếu có)
+        if (SplineMesh) SplineActor->WaypointMesh = SplineMesh;
+    }
+
+   
+    SplineActor->WaypointScale = WaypointScale;
+
+    // Chọn sửa lỗi phù hợp dựa trên kiểu thực tế của SplineActor->WaypointScale
+
+    if (SplineMaterial)
+    {
+        SplineActor->SplineMaterial = SplineMaterial;
+    }
+
+    // 2. Tạo dữ liệu Spline và vẽ các Waypoint (ISMC)
+    SplineActor->BuildSplineFromPoints(LocalPoints);
+
+    // 3. [QUAN TRỌNG] Tạo Mesh cho đường nối (Spline Mesh)
+    if (SplineMesh)
+    {
+        // Width = 20.0f (hoặc số tùy ý), chỉnh độ dày đường nối
+        SplineActor->BuildSplineMeshes(SplineMesh, Thickness);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Visualizer] Chưa chọn SplineMesh! Chỉ hiển thị Waypoint."));
+    }
+
+    UE_LOG(LogTemp, Log, TEXT("[Visualizer] Spawned SplineActor and built path."));
+
+
+    
+    //DrawDebugPoints(LocalPoints);
 }
 
 void AFlightVisualizer::DrawDebugPoints(const TArray<FVector>& Points)
@@ -136,10 +219,10 @@ void AFlightVisualizer::DrawDebugPoints(const TArray<FVector>& Points)
         DrawDebugSphere(
             GetWorld(),
             ScaledPos,
-            30,     // sphere radius
+            10,     // sphere radius
             12,
-            FColor::Red,
-            false,
+            FColor::Green,
+            true,
             600
         );
 

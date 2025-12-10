@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "FlightPoint.h"
 #include "FlightCoordinateActor.h"
+#include "FlightPathSplineActor.h"
 #include "FlightVisualizer.generated.h"
 
 UCLASS()
@@ -40,6 +41,26 @@ public:
 	// Actor chuyen doi GPS ENU
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
 	AFlightCoordinateActor* CoordinateSystem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
+	float WorldScale = 50.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
+	float Thickness = 20.0f;
+
+	// [SỬA] Mesh dùng để hiển thị đường nối (chọn Cylinder/Pipe)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
+	UStaticMesh* SplineMesh;
+
+	// [THÊM MỚI] Mesh dùng để hiển thị các điểm Waypoint (chọn Sphere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
+	UStaticMesh* WaypointMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
+	FVector WaypointScale = FVector(1.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
+	UMaterialInterface* SplineMaterial;
 
 private:
 	void DrawDebugPoints(const TArray<FVector>& Points);
