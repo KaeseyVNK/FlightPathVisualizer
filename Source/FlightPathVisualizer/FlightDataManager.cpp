@@ -173,12 +173,25 @@ bool UFlightDataManager::ParseCSV(const FString& FilePath, TArray<struct FFlight
 			continue;
 		}
 
-		
-		FFlightPoint Point(Timestamp, Lat, Lon, Alt);
-		OutPoints.Add(Point);
+        
+        FFlightPoint Point(Timestamp, Lat, Lon, Alt);
 
-		
-		//UE_LOG(LogTemp, Log, TEXT("[ParseCSV] Line %d OK ? Timestamp=%s | Lat=%.6f | Lon=%.6f | Alt=%.2f"),
+        // [THÊM ĐOẠN NÀY VÀO]
+        TArray<FString> TimeParts;
+        Timestamp.ParseIntoArray(TimeParts, TEXT(":"), true);
+        if (TimeParts.Num() >= 3)
+        {
+            double Hours = FCString::Atod(*TimeParts[0]);
+            double Mins = FCString::Atod(*TimeParts[1]);
+            double Secs = FCString::Atod(*TimeParts[2]);
+            Point.TimeInSeconds = Hours * 3600.0 + Mins * 60.0 + Secs;
+        }
+        // [HẾT ĐOẠN THÊM]
+
+        OutPoints.Add(Point);
+
+        
+        //UE_LOG(LogTemp, Log, TEXT("[ParseCSV] Line %d OK ? Timestamp=%s | Lat=%.6f | Lon=%.6f | Alt=%.2f"),
 			/*i + 1, *Timestamp, Lat, Lon, Alt);*/
 	}
 

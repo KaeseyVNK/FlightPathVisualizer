@@ -4,6 +4,7 @@
 #include "FlightVisualizer.h"
 #include "FlightDataManager.h"
 #include "DrawDebugHelpers.h"
+#include "FlightMathLibrary.h" // Nhớ include thư viện toán
 #include "FlightPathSplineActor.h"
 // Sets default values
 AFlightVisualizer::AFlightVisualizer()
@@ -101,6 +102,8 @@ void AFlightVisualizer::LoadAndVisualizeFlightPath(const FString& CSVPath)
         return;
     }
 
+    ParsedGPSPoints = GPSPoints;
+
     UE_LOG(LogTemp, Log, TEXT("[Visualizer] Parsed %d GPS points."), GPSPoints.Num());
 
   
@@ -139,6 +142,7 @@ void AFlightVisualizer::LoadAndVisualizeFlightPath(const FString& CSVPath)
 		UE_LOG(LogTemp, Warning, TEXT("[Visualizer] SplineMesh is NULL, cannot build spline meshes."));
     }*/
 
+    CaculateFlightStats(GPSPoints);
     
     FlushPersistentDebugLines(GetWorld());
 
@@ -205,6 +209,84 @@ void AFlightVisualizer::LoadAndVisualizeFlightPath(const FString& CSVPath)
     //DrawDebugPoints(LocalPoints);
 }
 
+void AFlightVisualizer::CaculateFlightStats(const TArray<FFlightPoint>& GPSPoints)
+{
+    if (GPSPoints.Num() < 2) {
+        return;
+    }
+
+    double TotalDistMeter = 0.0;
+    double TotalAlt = 0.0;
+
+    for (int32 i = 0; i < GPSPoints.Num(); i++)
+    {
+		TotalAlt += GPSPoints[i].Altitude;
+        UE_LOG(LogTemp, Log, TEXT("Point %d: Lat=%f, Lon=%f, Alt=%f, Timestamp=%f"), 
+			i, GPSPoints[i].Latitude, GPSPoints[i].Longitude, GPSPoints[i].Altitude, GPSPoints[i].TimeInSeconds );
+        if (i > 0) 
+        {
+            //c1: su dung cong thuc haversine de tinh toan khoang cach giua 2 diem tren GPS
+            //TotalDistMeter += UFlightMathLibary::HaversineDistance(GPSPoints[i - 1], GPSPoints[i]);
+
+            //c2: su dung khoang cach cua euclidean trong unreal
+            if (CoordinateSystem)
+            {
+                FVector P1 = CoordinateSystem->ConvertSingle(GPSPoints[i - 1]);
+                FVector P2 = CoordinateSystem->ConvertSingle(GPSPoints[i]);
+				TotalDistMeter += FVector::Dist(P1, P2);
+            }
+        }
+    }
+
+    //tong khoang cach duoc tinh bang km
+	TotalDistanceKm = (float)(TotalDistMeter / 1000.0);
+
+    //tong do cao trung binh bay 
+	AvgAltitudeMeters = (float)(TotalAlt / GPSPoints.Num());
+
+    TotalFlightTimeSec = (float)(GPSPoints.Last().TimeInSeconds - GPSPoints[0].TimeInSeconds);
+
+}
+
+TArray<UFlightPointData*> AFlightVisualizer::GetFlightPointsForListView()
+{
+    TArray<UFlightPointData*> DataList;
+
+    for (int32 i = 0; i < ParsedGPSPoints.Num(); i++)
+    {
+        UFlightPointData* DataObj = NewObject<UFlightPointData>(this);
+        DataObj->PointData = ParsedGPSPoints[i];
+        DataObj->Index = i + 1;
+
+        // [THÊM MỚI] Tính toán thông tin tới điểm tiếp theo
+        if (i < ParsedGPSPoints.Num() - 1)
+        {
+            const FFlightPoint& CurrentP = ParsedGPSPoints[i];
+            const FFlightPoint& NextP = ParsedGPSPoints[i + 1];
+
+            // Tính khoảng cách (Haversine hoặc Euclidean tùy bạn chọn, ở đây dùng Haversine cho chuẩn GPS)
+            DataObj->DistanceToNext = (float)UFlightMathLibrary::HaversineDistance(CurrentP, NextP);
+
+            // Tính vận tốc
+            DataObj->VelocityToNext = (float)UFlightMathLibrary::ComputeInstanVeclocity(CurrentP, NextP);
+
+            // Tính góc phương vị
+            DataObj->BearingToNext = (float)UFlightMathLibrary::ComputeBearing(CurrentP, NextP);
+        }
+        else
+        {
+            // Điểm cuối cùng không có điểm tiếp theo
+            DataObj->DistanceToNext = 0.0f;
+            DataObj->VelocityToNext = 0.0f;
+            DataObj->BearingToNext = 0.0f;
+        }
+
+        DataList.Add(DataObj);
+    }
+
+    return DataList;
+}
+
 void AFlightVisualizer::DrawDebugPoints(const TArray<FVector>& Points)
 {
     UWorld* World = GetWorld();
@@ -229,5 +311,14 @@ void AFlightVisualizer::DrawDebugPoints(const TArray<FVector>& Points)
         UE_LOG(LogTemp, Log, TEXT("Scaled Debug Point %d = %s"),
             i, *ScaledPos.ToString());
     }
+}
+
+FFlightStats AFlightVisualizer::GetFlightStatistics() const
+{
+    FFlightStats Stats;
+    Stats.TotalDistanceKm = TotalDistanceKm;
+    Stats.TotalFlightTimeSec = TotalFlightTimeSec;
+    Stats.AvgAltitudeMeters = AvgAltitudeMeters;
+    return Stats;
 }
 
