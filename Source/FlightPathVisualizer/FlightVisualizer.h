@@ -87,10 +87,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight")
 	UMaterialInterface* SplineMaterial;
 
+    // [THÊM MỚI] Biến này dùng để lưu giữ Actor đường bay hiện tại
+    UPROPERTY()
+    AFlightPathSplineActor* CurrentSplineActor;
 
-
-
-	//===========================
+    //===========================
 	//Stats cua chuyen bay
 	//===========================
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flight Stats")
