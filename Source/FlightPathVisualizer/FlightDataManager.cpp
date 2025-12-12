@@ -202,11 +202,11 @@ bool UFlightDataManager::ParseCSV(const FString& FilePath, TArray<struct FFlight
 	//=============================================
 	if (OutPoints.Num() >= 2)
 	{
-		/*UE_LOG(LogTemp, Log, TEXT(""));
+		UE_LOG(LogTemp, Log, TEXT(""));
 		UE_LOG(LogTemp, Log, TEXT("======= FLIGHT METRICS BETWEEN POINTS ======="));
 		UE_LOG(LogTemp, Log, TEXT("%-10s %-24s %-24s %-12s %-15s %-15s"), 
 			TEXT("Segment"), TEXT("From"), TEXT("To"), TEXT("Distance(m)"), TEXT("Velocity(m/s)"), TEXT("Bearing(deg)"));
-		UE_LOG(LogTemp, Log, TEXT("----------------------------------------------------------------------"));*/
+		UE_LOG(LogTemp, Log, TEXT("----------------------------------------------------------------------"));
 
 		double TotalDistance = 0.0;
 
@@ -226,8 +226,8 @@ bool UFlightDataManager::ParseCSV(const FString& FilePath, TArray<struct FFlight
 			double Bearing = UFlightMathLibrary::ComputeBearing(PointA, PointB);
 
 			// In ra log
-			//UE_LOG(LogTemp, Log, TEXT("[%d->%d]   %-12s %-12s    %-12.2f %-15.2f %-15.2f  [%.6f,%.6f] --> [%.6f,%.6f]"),
-				/*i + 1, i + 2,
+			UE_LOG(LogTemp, Log, TEXT("[%d->%d]   %-12s %-12s    %-12.2f %-15.2f %-15.2f  [%.6f,%.6f] --> [%.6f,%.6f]"),
+				i + 1, i + 2,
 				*PointA.Timestamp,
 				*PointB.Timestamp,
 				Distance,
@@ -237,12 +237,12 @@ bool UFlightDataManager::ParseCSV(const FString& FilePath, TArray<struct FFlight
 				PointA.Longitude,
 				PointB.Latitude,
 				PointB.Longitude
-				);*/
+				);
 		}
 
-		//UE_LOG(LogTemp, Log, TEXT("----------------------------------------------------------------------"));
-		//UE_LOG(LogTemp, Log, TEXT("TOTAL DISTANCE: %.2f meters (%.2f km)"), TotalDistance, TotalDistance / 1000.0);
-		//UE_LOG(LogTemp, Log, TEXT("======= END FLIGHT METRICS ======="));
+		UE_LOG(LogTemp, Log, TEXT("----------------------------------------------------------------------"));
+		UE_LOG(LogTemp, Log, TEXT("TOTAL DISTANCE: %.2f meters (%.2f km)"), TotalDistance, TotalDistance / 1000.0);
+		UE_LOG(LogTemp, Log, TEXT("======= END FLIGHT METRICS ======="));
 	}
 	else
 	{
