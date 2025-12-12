@@ -30,68 +30,17 @@ void AFlightVisualizer::Tick(float DeltaTime)
 
 void AFlightVisualizer::LoadAndVisualizeFlightPath(const FString& CSVPath)
 {
-   /* if (!GeoConverter)
+    // === 1. DỌN DẸP DỮ LIỆU CŨ ===
+    // Nếu đã có SplineActor từ lần load trước, hãy hủy nó đi
+    if (CurrentSplineActor)
     {
-        UE_LOG(LogTemp, Error, TEXT("[Visualizer] GeoConverter is NULL! Assign it in the Editor."));
-        return;
+        CurrentSplineActor->Destroy();
+        CurrentSplineActor = nullptr;
     }
 
-    
-    TArray<FFlightPoint> GPSPoints;
-    bool bParsed = UFlightDataManager::ParseCSV(CSVPath, GPSPoints);
-
-    if (!bParsed || GPSPoints.Num() == 0)
-    {
-        UE_LOG(LogTemp, Error, TEXT("[Visualizer] Failed to parse CSV: %s"), *CSVPath);
-        return;
-    }
-
-    UE_LOG(LogTemp, Log, TEXT("[Visualizer] Parsed %d GPS points."), GPSPoints.Num());
-
-   
-    TArray<FVector> LocalPoints;
-    bool bConverted = GeoConverter->ConvertGPSArrayToUE(GPSPoints, LocalPoints);
-
-    if (!bConverted)
-    {
-        UE_LOG(LogTemp, Error, TEXT("[Visualizer] GPS conversion failed!"));
-        return;
-    }
-
-    UE_LOG(LogTemp, Log, TEXT("[Visualizer] Conversion OK. Debug spheres spawned for %d points."), LocalPoints.Num());*/
-
-	//============-=====================-===========================
-   /* if (!GeoConverter)
-    {
-        UE_LOG(LogTemp, Error, TEXT("[Visualizer] GeoConverter is NULL! Assign it in the Editor."));
-        return;
-    }
-
-    TArray<FFlightPoint> GPSPoints;
-    bool bParsed = UFlightDataManager::ParseCSV(CSVPath, GPSPoints);
-
-    if (!bParsed || GPSPoints.Num() == 0)
-    {
-        UE_LOG(LogTemp, Error, TEXT("[Visualizer] Failed to parse CSV: %s"), *CSVPath);
-        return;
-    }
-
-    UE_LOG(LogTemp, Log, TEXT("[Visualizer] Parsed %d GPS points."), GPSPoints.Num());
-
-    
-    GeoConverter->SetOriginFromFirstPoint(GPSPoints[0]);
-
-    TArray<FVector> LocalPoints;
-    bool bConverted = GeoConverter->ConvertGPSArrayToUE(GPSPoints, LocalPoints);
-
-    if (!bConverted)
-    {
-        UE_LOG(LogTemp, Error, TEXT("[Visualizer] GPS conversion failed!"));
-        return;
-    }
-
-    UE_LOG(LogTemp, Log, TEXT("[Visualizer] Conversion OK. Debug spheres spawned for %d points."), LocalPoints.Num());*/
-	//===========================================
+    // Xóa dữ liệu mảng cũ
+    ParsedGPSPoints.Empty();
+    // =============================
 
     UE_LOG(LogTemp, Log, TEXT("[Visualizer] Selected file: %s"), *CSVPath);
 
@@ -130,72 +79,37 @@ void AFlightVisualizer::LoadAndVisualizeFlightPath(const FString& CSVPath)
 
     UE_LOG(LogTemp, Log, TEXT("[Visualizer] Converted %d points to ENU space."), LocalPoints.Num());
 
-    /*AFlightPathSplineActor* SplineActor = GetWorld()->SpawnActor<AFlightPathSplineActor>();
-    SplineActor->BuildSplineFromPoints(LocalPoints);
-
-    if (SplineMesh)
-    {
-        SplineActor->BuildSplineMeshes(SplineMesh, 10.0f);
-	}
-    else
-    {
-		UE_LOG(LogTemp, Warning, TEXT("[Visualizer] SplineMesh is NULL, cannot build spline meshes."));
-    }*/
-
     CaculateFlightStats(GPSPoints);
     
     FlushPersistentDebugLines(GetWorld());
 
-    //float DebugScale = 50.0f;
+    // === 2. TẠO MỚI SPLINE ACTOR VÀ LƯU VÀO BIẾN CurrentSplineActor ===
+    CurrentSplineActor = GetWorld()->SpawnActor<AFlightPathSplineActor>();
 
-    //if (LocalPoints.Num() > 1)
-    //{
-    //    for (int32 i = 0; i < LocalPoints.Num() - 1; i++)
-    //    {
-    //        DrawDebugLine(
-    //            GetWorld(),
-    //            LocalPoints[i] * DebugScale,         // Điểm bắt đầu
-    //            LocalPoints[i + 1] * DebugScale,     // Điểm kết thúc
-    //            FColor::Green,           // Màu sắc (Cyan cho dễ nhìn trên nền tối)
-    //            true,                   // Persistent = true (giữ nguyên trên màn hình không biến mất)
-    //            -1.0f,                  // Lifetime (vô hạn nếu Persistent=true)
-    //            0,                      // DepthPriority
-    //            10.0f                    // Thickness (độ dày đường)
-    //        );
-    //    }
-    //}
-
-    AFlightPathSplineActor* SplineActor = GetWorld()->SpawnActor<AFlightPathSplineActor>();
-
-    // 1. Cấu hình Mesh cho Waypoint (các điểm)
+    // Cấu hình Mesh cho Waypoint (các điểm)
     if (WaypointMesh)
     {
-        SplineActor->WaypointMesh = WaypointMesh;
+        CurrentSplineActor->WaypointMesh = WaypointMesh;
     }
     else
     {
-        // Fallback: Nếu chưa chọn WaypointMesh, dùng tạm SplineMesh (nếu có)
-        if (SplineMesh) SplineActor->WaypointMesh = SplineMesh;
+        if (SplineMesh) CurrentSplineActor->WaypointMesh = SplineMesh;
     }
 
-   
-    SplineActor->WaypointScale = WaypointScale;
-
-    // Chọn sửa lỗi phù hợp dựa trên kiểu thực tế của SplineActor->WaypointScale
+    CurrentSplineActor->WaypointScale = WaypointScale;
 
     if (SplineMaterial)
     {
-        SplineActor->SplineMaterial = SplineMaterial;
+        CurrentSplineActor->SplineMaterial = SplineMaterial;
     }
 
-    // 2. Tạo dữ liệu Spline và vẽ các Waypoint (ISMC)
-    SplineActor->BuildSplineFromPoints(LocalPoints);
+    // Tạo dữ liệu Spline và vẽ các Waypoint (ISMC)
+    CurrentSplineActor->BuildSplineFromPoints(LocalPoints);
 
-    // 3. [QUAN TRỌNG] Tạo Mesh cho đường nối (Spline Mesh)
+    // Tạo Mesh cho đường nối (Spline Mesh)
     if (SplineMesh)
     {
-        // Width = 20.0f (hoặc số tùy ý), chỉnh độ dày đường nối
-        SplineActor->BuildSplineMeshes(SplineMesh, Thickness);
+        CurrentSplineActor->BuildSplineMeshes(SplineMesh, Thickness);
     }
     else
     {
