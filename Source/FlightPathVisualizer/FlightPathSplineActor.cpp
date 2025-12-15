@@ -16,12 +16,16 @@ AFlightPathSplineActor::AFlightPathSplineActor()
 	SplineComp->bDrawDebug = true;
 
 	//Khoi Tao ISMC
-	WaypointISMC = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("WaypointISMC"));
-	WaypointISMC->SetupAttachment(RootComponent);
-	WaypointISMC->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    WaypointISMC = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("WaypointISMC"));
+    WaypointISMC->SetupAttachment(RootComponent);
+    
+    // [SỬA LẠI] Bật va chạm để Line Trace có thể bắn trúng
+    WaypointISMC->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    WaypointISMC->SetCollisionResponseToAllChannels(ECR_Ignore);
+    WaypointISMC->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block); // Chỉ chặn kênh Visibility
 
-	/// Cau hinh cho phep truyen du lieu custom vao shader
-	WaypointISMC->NumCustomDataFloats = 1;
+    /// Cau hinh cho phep truyen du lieu custom vao shader
+    WaypointISMC->NumCustomDataFloats = 1;
 }
 
 // Called when the game starts or when spawned

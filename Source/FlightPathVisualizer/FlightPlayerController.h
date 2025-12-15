@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -12,6 +12,7 @@
  */
 class UInputMappingContext;
 class UInputAction;
+class AFlightVisualizer;
 
 
 UCLASS()
@@ -35,13 +36,31 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void ToggleFlightListUI();
 
+	UFUNCTION(BlueprintCallable, Category = "Flight Control")
+	void TeleportCameraToLocation(FVector TargetLocation, float Bearing = 0.0f);
+
+	virtual void Tick(float DeltaTime) override;
+
 protected:
 
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 
+	//Widget class de hien thi thong tin
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> WaypointInfoWidgetClass;
+
+	//bien luu instance cua widget
+	UPROPERTY()
+	UUserWidget* WaypointInfoWidget;
+
 	void OnShowMouseTrigged(const FInputActionValue& Value);
 	void OnShowMouseCompeted(const FInputActionValue& Value);
 	void OnToggleListTrigged(const FInputActionValue& Value);
 	
+private:
+    void PerformInteractionTrace();
+
+    UPROPERTY()
+    AFlightVisualizer* CachedVisualizer;
 };
