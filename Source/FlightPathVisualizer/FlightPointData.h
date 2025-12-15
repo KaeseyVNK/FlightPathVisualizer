@@ -27,6 +27,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data", Meta = (MakeEditWidget = true))
 	int32 Index;
 
+	//Them vi tri thuc te trong the gioi 3d
+	UPROPERTY(BlueprintReadOnly, Category = "Flight Data")
+	FVector WorldLocation;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	//m
 	float DistanceToNext; 

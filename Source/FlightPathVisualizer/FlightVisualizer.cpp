@@ -172,6 +172,14 @@ TArray<UFlightPointData*> AFlightVisualizer::GetFlightPointsForListView()
         DataObj->PointData = ParsedGPSPoints[i];
         DataObj->Index = i + 1;
 
+
+        //Tinh toan vi tri the gioi 3d
+        if (CoordinateSystem)
+        {
+            FVector LocalPos = CoordinateSystem->ConvertSingle(ParsedGPSPoints[i]);
+			DataObj->WorldLocation = LocalPos * WorldScale;
+        }
+
         // [THÊM MỚI] Tính toán thông tin tới điểm tiếp theo
         if (i < ParsedGPSPoints.Num() - 1)
         {

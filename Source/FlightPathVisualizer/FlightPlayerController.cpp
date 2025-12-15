@@ -16,6 +16,54 @@ AFlightPlayerController::AFlightPlayerController()
 
 
 
+void AFlightPlayerController::TeleportCameraToLocation(FVector TargetLocation, float Bearing)
+{
+	APawn* ControlledPawn = GetPawn();
+	if (ControlledPawn)
+	{
+		//FVector CameraOffset = FVector(0, 0, 500.0f); // Đặt camera cao hơn 500 đơn vị so với vị trí mục tiêu
+		//ControlledPawn->SetActorLocation(TargetLocation);
+
+		////Neu muon camera nhin xuong diem do, co the set Rotaion 
+		////ControlledPawn->SetActorRotation(FRotator(-90.0f, 0.0f, 0.0f));
+
+		//--------------------------------------------------------------------------------------------
+		// 1. Tính toán hướng bay (Flight Direction) từ Bearing
+		// Lưu ý: Trong hệ tọa độ của bạn (dựa trên FlightCoordinateActor):
+		// Bearing 0 (Bắc) -> Y+ 
+		// Bearing 90 (Đông) -> X+
+
+		float BearingRad = FMath::DegreesToRadians(Bearing);
+		FVector FlightDir(FMath::Sin(BearingRad), FMath::Cos(BearingRad), 0.0f);
+
+		// 2. Tính toán vector bên phải (Right Vector) vuông góc với hướng bay
+		// Nếu FlightDir là (x, y), thì RightVector là (y, -x)
+		FVector RightDir(FlightDir.Y, -FlightDir.X, 0.0f);
+
+		// 3. Thiết lập khoảng cách Offset
+		float SideDistance = 200.0f; // Cách sang bên 30 mét (3000 units)
+		float HeightOffset = 100.0f; // Cao hơn 20 mét (2000 units)
+
+		// Vị trí Camera mới = Mục tiêu + (Sang phải * Khoảng cách) + (Lên cao)
+		// Bạn có thể đổi RightDir thành -RightDir nếu muốn camera nằm bên trái
+		FVector CameraLocation = TargetLocation + (RightDir * SideDistance) + FVector(0, 0, HeightOffset);
+
+		// 4. Di chuyển Pawn tới vị trí mới
+		ControlledPawn->SetActorLocation(CameraLocation);
+
+		// 5. Xoay Camera để nhìn vào mục tiêu (Look At)
+		// Vector hướng từ Camera tới Mục tiêu
+		FVector LookAtDir = TargetLocation - CameraLocation;
+		FRotator NewRotation = LookAtDir.Rotation();
+
+		// Cập nhật xoay cho Pawn (để mô hình nhân vật quay theo - nếu có)
+		ControlledPawn->SetActorRotation(NewRotation);
+
+		// QUAN TRỌNG: Cập nhật xoay cho Controller (để Camera quay theo)
+		SetControlRotation(NewRotation);
+	}
+}
+
 void AFlightPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

@@ -35,6 +35,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void ToggleFlightListUI();
 
+	UFUNCTION(BlueprintCallable, Category = "Flight Control")
+	void TeleportCameraToLocation(FVector TargetLocation, float Bearing = 0.0f);
+
 protected:
 
 	virtual void BeginPlay() override;
