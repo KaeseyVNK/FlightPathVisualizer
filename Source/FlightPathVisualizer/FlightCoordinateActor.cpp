@@ -55,7 +55,7 @@ FVector AFlightCoordinateActor::ConvertSingle(const FFlightPoint& P) const
     double dLonDeg = P.Longitude - Origin_Lon;
     double dAlt = P.Altitude - Origin_Alt;
 
-    double Y = dLatDeg * MetersPerLat;   // North
+    double Y = (-1) * dLatDeg * MetersPerLat;   // North
     double X = dLonDeg * MetersPerLon;   // East
     double Z = dAlt;                     // Altitude preserved exactly
 
