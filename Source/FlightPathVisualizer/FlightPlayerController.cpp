@@ -50,6 +50,11 @@ void AFlightPlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     PerformInteractionTrace();
+
+    if(CurrentCameraMode == EFlightCameraMode::RTS)
+    {
+        UpdateRTSCamera(DeltaTime);
+	}
 }
 
 void AFlightPlayerController::BeginPlay()
@@ -85,10 +90,23 @@ void AFlightPlayerController::SetupInputComponent()
     {
         EnhancedInputComponent->BindAction(ShowMouseAction, ETriggerEvent::Started, this, &AFlightPlayerController::OnShowMouseTrigged);
         EnhancedInputComponent->BindAction(ShowMouseAction, ETriggerEvent::Completed, this, &AFlightPlayerController::OnShowMouseCompeted);
-        
+
         if (ToggleListAction)
         {
             EnhancedInputComponent->BindAction(ToggleListAction, ETriggerEvent::Started, this, &AFlightPlayerController::OnToggleListTrigged);
+        }
+
+        // [SỬA LỖI] Bind Action cho Toggle Camera
+        if (ToggleCameraAction)
+        {
+            EnhancedInputComponent->BindAction(ToggleCameraAction, ETriggerEvent::Started, this, &AFlightPlayerController::ToggleCameraMode);
+        }
+
+        // [SỬA LỖI] Bind Action cho Zoom Camera
+        // Lưu ý: Hàm OnZoomCamera phải nhận tham số (const FInputActionValue& Value)
+        if (CameraZoomAction)
+        {
+            EnhancedInputComponent->BindAction(CameraZoomAction, ETriggerEvent::Triggered, this, &AFlightPlayerController::OnZoomCamera);
         }
     }
 }
@@ -118,6 +136,65 @@ void AFlightPlayerController::OnShowMouseCompeted(const FInputActionValue& Value
 void AFlightPlayerController::OnToggleListTrigged(const FInputActionValue& Value)
 {
     ToggleFlightListUI();
+}
+
+void AFlightPlayerController::ToggleCameraMode()
+{
+    if (CurrentCameraMode == EFlightCameraMode::FreeFly)
+    {
+        // Chuyển sang RTS
+        CurrentCameraMode = EFlightCameraMode::RTS;
+
+        // 1. Hiện chuột để thao tác
+        bShowMouseCursor = false;
+        bEnableClickEvents = false;
+        bEnableMouseOverEvents = false;
+
+        // 2. Đặt lại góc nhìn (Nhìn xuống đất)
+        APawn* ControlledPawn = GetPawn();
+        if (ControlledPawn)
+        {
+            FRotator CurrentRot = ControlledPawn->GetActorRotation();
+            // Giữ nguyên Yaw (hướng xoay ngang), chỉ thay đổi Pitch (nhìn xuống)
+            FRotator NewRot = FRotator(RTSPitchAngle, CurrentRot.Yaw, 0.0f);
+
+            SetControlRotation(NewRot);
+            ControlledPawn->SetActorRotation(NewRot);
+
+            // Thiết lập độ cao ban đầu cho biến RTSHeight
+            RTSHeight = ControlledPawn->GetActorLocation().Z;
+        }
+    }
+    else
+    {
+        // Chuyển về Free Fly
+        CurrentCameraMode = EFlightCameraMode::FreeFly;
+
+        // 1. Ẩn chuột
+        bShowMouseCursor = false;
+        bEnableClickEvents = false;
+        bEnableMouseOverEvents = false;
+
+        // Reset Input Mode về Game Only
+        FInputModeGameOnly InputMode;
+        SetInputMode(InputMode);
+    }
+
+}
+
+void AFlightPlayerController::OnZoomCamera(const FInputActionValue& Value)
+{
+    // [THÊM DÒNG NÀY] Lấy giá trị float từ Input Action Value
+    float AxisValue = Value.Get<float>();
+
+    if (CurrentCameraMode == EFlightCameraMode::RTS && AxisValue != 0.0f)
+    {
+        // Trừ đi vì lăn lên thường là Zoom vào (giảm độ cao)
+        RTSHeight -= AxisValue * ZoomSpeed;
+
+        // Giới hạn độ cao (Clamp)
+        RTSHeight = FMath::Clamp(RTSHeight, 500.0f, 50000.0f);
+    }
 }
 
 void AFlightPlayerController::PerformInteractionTrace()
@@ -214,4 +291,24 @@ void AFlightPlayerController::PerformInteractionTrace()
     {
         WaypointInfoWidget->RemoveFromParent();
     }
+}
+
+void AFlightPlayerController::UpdateRTSCamera(float DeltaTime)
+{
+    APawn* ControlledPawn = GetPawn();
+    if (!ControlledPawn) return;
+
+    // 1. Cưỡng chế góc nhìn luôn nhìn xuống
+    FRotator CurrentControlRot = GetControlRotation();
+    if (!FMath::IsNearlyEqual(CurrentControlRot.Pitch, RTSPitchAngle, 1.0f))
+    {
+        FRotator NewRot = FRotator(RTSPitchAngle, CurrentControlRot.Yaw, 0.0f);
+        SetControlRotation(NewRot);
+    }
+
+    // 2. Làm mượt độ cao (Smooth Zoom)
+    FVector CurrentLoc = ControlledPawn->GetActorLocation();
+    float NewZ = FMath::FInterpTo(CurrentLoc.Z, RTSHeight, DeltaTime, 5.0f);
+
+    ControlledPawn->SetActorLocation(FVector(CurrentLoc.X, CurrentLoc.Y, NewZ));
 }
