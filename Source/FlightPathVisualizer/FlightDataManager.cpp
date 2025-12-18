@@ -17,11 +17,53 @@
 #include "FlightPoint.h"
 #include "FlightMathLibrary.h"
 
+#if WITH_EDITOR
+#include "Interfaces/IMainFrameModule.h"
+#endif
+
 //=============================================
 bool  UFlightDataManager::OpenCSVFileDialog(FString& OutFilePath)
 {
 
 	//Kiem tra xem co truy cap duoc module desktop platform khong
+	//IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+	//if (!DesktopPlatform)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Desktop Platform module is not available."));
+	//	return false;
+	//}
+
+	////Mang chua danh cac file duoc chon
+	//TArray<FString> SelectedFiles;
+
+
+	////Hien thi hop thoai chon file
+	//bool bOpened = DesktopPlatform ->OpenFileDialog(
+	//	nullptr,									//Khong co cua so cha
+	//	TEXT("Chon file CSV"),						//Tieu de hop thoai
+	//	TEXT(""),									//Thu muc mac dinh
+	//	TEXT(""),									//Ten file mac dinh
+	//	TEXT("CSV files (*.csv)|*.csv"),			//Loc file chi hien thi file csv
+	//	EFileDialogFlags::None,						//Khong co co che dac biet
+	//	SelectedFiles								//Mang chua duong dan file duoc chon
+	//);
+
+
+	////Kiem tra neu nguoi dung da chon file hay chua
+	//if(!bOpened || SelectedFiles.Num() == 0)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("No file was selected."));
+	//	return false;
+	//}
+
+	////Lay duong dan file dau tien trong mang
+	//OutFilePath = SelectedFiles[0];
+
+	//UE_LOG(LogTemp, Log, TEXT("Selected file: %s"), *OutFilePath);
+
+	//return true;
+
+		//Kiem tra xem co truy cap duoc module desktop platform khong
 	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
 	if (!DesktopPlatform)
 	{
@@ -32,21 +74,41 @@ bool  UFlightDataManager::OpenCSVFileDialog(FString& OutFilePath)
 	//Mang chua danh cac file duoc chon
 	TArray<FString> SelectedFiles;
 
+	// Lấy Window Handle của Editor hoặc Game
+	void* ParentWindowHandle = nullptr;
+
+#if WITH_EDITOR
+	// Trong Editor, lấy Main Frame Window
+	if (FModuleManager::Get().IsModuleLoaded("MainFrame"))
+	{
+		IMainFrameModule& MainFrame = FModuleManager::LoadModuleChecked<IMainFrameModule>("MainFrame");
+		const TSharedPtr<SWindow> ParentWindow = MainFrame.GetParentWindow();
+		if (ParentWindow.IsValid())
+		{
+			ParentWindowHandle = ParentWindow->GetNativeWindow()->GetOSWindowHandle();
+		}
+	}
+#else
+	// Trong Game runtime, lấy Game Viewport Window
+	if (GEngine && GEngine->GameViewport)
+	{
+		ParentWindowHandle = GEngine->GameViewport->GetWindow()->GetNativeWindow()->GetOSWindowHandle();
+	}
+#endif
 
 	//Hien thi hop thoai chon file
-	bool bOpened = DesktopPlatform ->OpenFileDialog(
-		nullptr,									//Khong co cua so cha
-		TEXT("Chon file CSV"),						//Tieu de hop thoai
-		TEXT(""),									//Thu muc mac dinh
-		TEXT(""),									//Ten file mac dinh
-		TEXT("CSV files (*.csv)|*.csv"),			//Loc file chi hien thi file csv
-		EFileDialogFlags::None,						//Khong co co che dac biet
-		SelectedFiles								//Mang chua duong dan file duoc chon
+	bool bOpened = DesktopPlatform->OpenFileDialog(
+		ParentWindowHandle,							// [SỬA] Truyền Window Handle thay vì nullptr
+		TEXT("Chon file CSV"),
+		TEXT(""),
+		TEXT(""),
+		TEXT("CSV files (*.csv)|*.csv"),
+		EFileDialogFlags::None,
+		SelectedFiles
 	);
 
-
 	//Kiem tra neu nguoi dung da chon file hay chua
-	if(!bOpened || SelectedFiles.Num() == 0)
+	if (!bOpened || SelectedFiles.Num() == 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No file was selected."));
 		return false;
@@ -58,6 +120,8 @@ bool  UFlightDataManager::OpenCSVFileDialog(FString& OutFilePath)
 	UE_LOG(LogTemp, Log, TEXT("Selected file: %s"), *OutFilePath);
 
 	return true;
+
+
 }
 
 
