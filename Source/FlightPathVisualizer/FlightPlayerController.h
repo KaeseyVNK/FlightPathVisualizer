@@ -14,6 +14,13 @@ class UInputMappingContext;
 class UInputAction;
 class AFlightVisualizer;
 
+UENUM(BlueprintType)
+enum class EFlightCameraMode : uint8 
+{
+	FreeFly		UMETA(DisplayName = "Free Fly"),
+	RTS 		UMETA(DisplayName = "RTS Mode"),
+};
+
 
 UCLASS()
 class FLIGHTPATHVISUALIZER_API AFlightPlayerController : public APlayerController
@@ -32,6 +39,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* ToggleListAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* CameraZoomAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* ToggleCameraAction;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void ToggleFlightListUI();
@@ -57,9 +70,38 @@ protected:
 	void OnShowMouseTrigged(const FInputActionValue& Value);
 	void OnShowMouseCompeted(const FInputActionValue& Value);
 	void OnToggleListTrigged(const FInputActionValue& Value);
-	
+
+public:
+
+	//Ben luu trang thai camera hien tai
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera Mode")
+	EFlightCameraMode CurrentCameraMode = EFlightCameraMode::FreeFly;
+
+	//Do cao mong muon khi o che do RTS 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS Camera")
+	float RTSHeight = 5000.0f;
+
+	//Goc nhin xuong khi o che do RTS
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS Camera")
+	float RTSPitchAngle = -60.0f;
+
+	//Toc do zoom khi o che do RTS
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RTS Camera")
+	float ZoomSpeed = 500.0f;
+
+	// Hàm chuyển đổi chế độ (Gọi từ Input Action)
+	UFUNCTION(BlueprintCallable, Category = "Camera Mode")
+	void ToggleCameraMode();
+
+	// Hàm xử lý Zoom (Gọi từ Input Action: Mouse Wheel)
+	UFUNCTION(BlueprintCallable, Category = "Camera Mode")
+	void OnZoomCamera(const FInputActionValue& Value);
+
 private:
     void PerformInteractionTrace();
+
+	// Hàm cập nhật vị trí RTS trong Tick
+	void UpdateRTSCamera(float DeltaTime);
 
     UPROPERTY()
     AFlightVisualizer* CachedVisualizer;
