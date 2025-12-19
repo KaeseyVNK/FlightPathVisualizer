@@ -48,4 +48,12 @@ public:
     // Convert array
     UFUNCTION(BlueprintCallable, Category = "GPS")
     void ConvertArray(const TArray<FFlightPoint>& InPoints, TArray<FVector>& OutLocal);
+
+    // Test: Generate position from bearing, distance, altitude
+    UFUNCTION(BlueprintCallable, Category = "GPS")
+    FVector GeneratePositionFromBearing(const FFlightPoint& StartPoint, double BearingDeg, double DistanceMeters, double AltitudeDelta) const;
+
+    // Test: Compare GPS-based vs Bearing-based coordinates
+    UFUNCTION(BlueprintCallable, Category = "GPS")
+    void TestDeadReckoningAccuracy(const TArray<FFlightPoint>& GPSPoints);
 };
