@@ -77,7 +77,18 @@ void AFlightVisualizer::LoadAndVisualizeFlightPath(const FString& CSVPath)
         }
     }
 
-    UE_LOG(LogTemp, Log, TEXT("[Visualizer] Converted %d points to ENU space."), LocalPoints.Num());
+    //UE_LOG(LogTemp, Log, TEXT("[Visualizer] Converted %d points to NED space."), LocalPoints.Num());
+    // UE_LOG(LogTemp, Log, TEXT("[Visualizer] Converted %d points to ENU space."), LocalPoints.Num());
+    UE_LOG(LogTemp, Log, TEXT("[Visualizer] Converted %d points to NED->Unreal space."), LocalPoints.Num());
+
+    // [TEST] Kiểm tra độ chính xác của Dead Reckoning
+    CoordinateSystem->TestDeadReckoningAccuracy(GPSPoints);
+
+    // [TEST] Kiểm tra độ chính xác của Dead Reckoning
+    CoordinateSystem->TestDeadReckoningAccuracy(GPSPoints);
+
+    // [TEST] Kiểm tra công thức WGS84
+    CoordinateSystem->TestWGS84Accuracy();
 
     CaculateFlightStats(GPSPoints);
     
