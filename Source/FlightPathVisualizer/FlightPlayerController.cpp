@@ -27,13 +27,18 @@ void AFlightPlayerController::TeleportCameraToLocation(FVector TargetLocation, f
     if (ControlledPawn)
     {
         float BearingRad = FMath::DegreesToRadians(Bearing);
-        FVector FlightDir(FMath::Sin(BearingRad), FMath::Cos(BearingRad), 0.0f);
+        
+        // NED->Unreal: X=North, Y=East, Z=Up
+        // Bearing 0° = North (+X), 90° = East (+Y)
+        FVector FlightDir(FMath::Cos(BearingRad), FMath::Sin(BearingRad), 0.0f);
 
+        // Right vector perpendicular to flight direction
         FVector RightDir(FlightDir.Y, -FlightDir.X, 0.0f);
 
         float SideDistance = 200.0f; 
         float HeightOffset = 100.0f; 
 
+        // In Unreal Z=Up, so positive height offset
         FVector CameraLocation = TargetLocation + (RightDir * SideDistance) + FVector(0, 0, HeightOffset);
 
         ControlledPawn->SetActorLocation(CameraLocation);
