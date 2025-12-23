@@ -56,4 +56,7 @@ public:
     // Test: Compare GPS-based vs Bearing-based coordinates
     UFUNCTION(BlueprintCallable, Category = "GPS")
     void TestDeadReckoningAccuracy(const TArray<FFlightPoint>& GPSPoints);
+
+    UFUNCTION(BlueprintCallable, Category = "GPS")
+	void TestWGS84Accuracy();
 };

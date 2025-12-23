@@ -84,6 +84,12 @@ void AFlightVisualizer::LoadAndVisualizeFlightPath(const FString& CSVPath)
     // [TEST] Kiểm tra độ chính xác của Dead Reckoning
     CoordinateSystem->TestDeadReckoningAccuracy(GPSPoints);
 
+    // [TEST] Kiểm tra độ chính xác của Dead Reckoning
+    CoordinateSystem->TestDeadReckoningAccuracy(GPSPoints);
+
+    // [TEST] Kiểm tra công thức WGS84
+    CoordinateSystem->TestWGS84Accuracy();
+
     CaculateFlightStats(GPSPoints);
     
     FlushPersistentDebugLines(GetWorld());

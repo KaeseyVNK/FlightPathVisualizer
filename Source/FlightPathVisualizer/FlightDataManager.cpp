@@ -62,8 +62,10 @@ bool  UFlightDataManager::OpenCSVFileDialog(FString& OutFilePath)
 	//UE_LOG(LogTemp, Log, TEXT("Selected file: %s"), *OutFilePath);
 
 	//return true;
-
-		//Kiem tra xem co truy cap duoc module desktop platform khong
+	// 
+	// 
+	//=========================================================================================================
+	//Kiem tra xem co truy cap duoc module desktop platform khong
 	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
 	if (!DesktopPlatform)
 	{
