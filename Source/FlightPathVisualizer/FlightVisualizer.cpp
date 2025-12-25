@@ -151,15 +151,15 @@ void AFlightVisualizer::CaculateFlightStats(const TArray<FFlightPoint>& GPSPoint
         if (i > 0) 
         {
             //c1: su dung cong thuc haversine de tinh toan khoang cach giua 2 diem tren GPS
-            //TotalDistMeter += UFlightMathLibary::HaversineDistance(GPSPoints[i - 1], GPSPoints[i]);
+            TotalDistMeter += UFlightMathLibrary::HaversineDistance(GPSPoints[i - 1], GPSPoints[i]);
 
             //c2: su dung khoang cach cua euclidean trong unreal
-            if (CoordinateSystem)
+            /*if (CoordinateSystem)
             {
                 FVector P1 = CoordinateSystem->ConvertSingle(GPSPoints[i - 1]);
                 FVector P2 = CoordinateSystem->ConvertSingle(GPSPoints[i]);
 				TotalDistMeter += FVector::Dist(P1, P2);
-            }
+            }*/
         }
     }
 

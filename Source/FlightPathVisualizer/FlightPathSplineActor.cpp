@@ -155,7 +155,7 @@ void AFlightPathSplineActor::BuildSplineMeshes(UStaticMesh* SplineMesh, float Wi
 	for(int32 i = 0; i < Count - 1; i++)
 	{
 		FVector StartPos, EndPos, StartTan, EndTan;
-		// Lay vi tri va tiang tai diem i va i+1
+		// Lay vi tri tai diem i va i+1
 		SplineComp->GetLocalLocationAndTangentAtSplinePoint(i, StartPos, StartTan);
 		SplineComp->GetLocalLocationAndTangentAtSplinePoint(i + 1, EndPos, EndTan);
 
